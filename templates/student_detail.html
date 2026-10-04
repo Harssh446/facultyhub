@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, empty, ring %}
+{% block title %}{{ p.student.name }}{% endblock %}
+{% block content %}
+{% set st = p.stat %}
+<div class="page-head"><div><h1>{{ p.student.name }}</h1><p class="muted">{{ p.student.roll }} · {{ p.student.branch }} · {{ p.student.email }}</p></div>
+  <div class="actions no-print">
+    <a class="btn btn-primary" href="{{ url_for('student_detail', roll=p.student.roll, summary=1) }}">✨ Generate progress summary</a>
+    <button class="btn" data-print>🖨 Print report</button>
+    {% if user.role == 'faculty' %}<a class="btn btn-ghost" href="{{ url_for('students') }}">← Students</a>{% endif %}</div></div>
+<div class="grid cols-3">
+  <div class="card" style="text-align:center">{{ ring(st.att) }}<p class="muted" style="margin:.6rem 0 0">{{ st.present }} of {{ st.days }} days</p></div>
+  <div class="card stat"><div class="ico">📝</div><div><b>{{ st.avg }}%</b><span>Average marks · Grade {{ st.grade }}</span></div></div>
+  <div class="card"><h2>Risk</h2>{{ badge(st.risk) }}{% for r in st.reasons %}<p class="muted" style="margin:.5rem 0 0">• {{ r }}</p>{% endfor %}</div>
+</div>
+{% if summary %}<div class="card"><h2>Progress summary <span class="badge {{ 'b-green' if summary.source == 'ollama' else 'b-late' }}">{{ 'AI (Ollama)' if summary.source == 'ollama' else 'Template fallback' }}</span></h2><p style="margin:0">{{ summary }}</p></div>{% endif %}
+<div class="card"><h2>Internal assessment</h2>
+  {% if p.marks %}<div class="table-wrap"><table><thead><tr><th>Subject</th><th>Test 1 /30</th><th>Test 2 /30</th><th>Assignment /20</th><th>Total /{{ TOTAL }}</th><th>%</th><th>Grade</th></tr></thead><tbody>
+  {% for m in p.marks %}<tr><td>{{ m.subject }}</td><td>{{ m.t1 }}</td><td>{{ m.t2 }}</td><td>{{ m.asg }}</td><td><b>{{ m.total }}</b></td><td>{{ m.pct }}</td><td>{{ m.grade }}</td></tr>{% endfor %}</tbody></table></div>
+  {% else %}{{ empty('📝', 'No marks yet', 'No internal marks have been entered.') }}{% endif %}</div>
+<div class="grid cols-2">
+  <div class="card"><h2>Assignments</h2>
+    {% for a in p.assigns %}<div class="list-item"><div><a href="{{ url_for('assignment_detail', aid=a.id) }}"><b>{{ a.title }}</b></a><br><small>{{ a.subject }} · due {{ a.due }}{% if a.sub and a.sub.marks is not none %} · {{ a.sub.marks }}/{{ a.max_marks }}{% endif %}</small></div>{{ badge(a.status) }}</div>
+    {% else %}{{ empty('📚', 'No assignments', 'Nothing has been assigned yet.') }}{% endfor %}</div>
+  <div class="card"><h2>Recent quizzes</h2>
+    {% for x in p.attempts %}<div class="list-item"><div><b>{{ x.subject }}</b><br><small>{{ x.date }}</small></div><span>{{ x.score }}/{{ x.total }}</span></div>
+    {% else %}{{ empty('🧠', 'No quiz attempts', 'No quizzes have been taken yet.') }}{% endfor %}</div>
+</div>
+{% endblock %}

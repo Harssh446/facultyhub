@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="actions no-print" style="margin-bottom:1rem"><button class="btn btn-primary" data-print>🖨 Print paper</button><a class="btn btn-ghost" href="{{ url_for('paper') }}">← Generate another</a></div>
+<div class="paper">
+  <h1>FacultyHub College of Engineering</h1>
+  <h2>{{ title }}</h2><h2 style="font-size:1rem;font-weight:500">{{ subject }}</h2>
+  <div class="meta"><span>Time: {{ duration }} min</span><span>Date: {{ today_str }}</span><span>Max marks: {{ total }}</span></div>
+  <p><b>Name:</b> ____________________ &nbsp; <b>Roll No:</b> ____________</p>
+  <p><i>Answer all questions. Each question carries {{ marks_per }} mark{{ '' if marks_per == 1 else 's' }}.</i></p>
+  <ol>{% for q in qs %}
+    <li><b>{{ q.question }}</b> <span style="float:right">[{{ marks_per }}]</span>
+      <div class="opts">{% for o in q.options %}<span>({{ 'abcd'[loop.index0] }}) {{ o }}</span>{% endfor %}</div></li>
+  {% endfor %}</ol>
+</div>
+{% if show_key %}
+<div class="paper page-break" style="margin-top:1.5rem">
+  <h2>Answer Key</h2><h2 style="font-size:1rem;font-weight:500">{{ title }} · {{ subject }}</h2>
+  <div class="meta"><span>{{ qs|length }} questions</span><span>Total {{ total }} marks</span></div>
+  <ol>{% for q in qs %}<li>({{ 'abcd'[q.answer] }}) {{ q.options[q.answer] }}</li>{% endfor %}</ol>
+</div>
+{% endif %}
+{% endblock %}

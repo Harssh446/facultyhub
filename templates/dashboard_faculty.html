@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, empty %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Hello, {{ user.name.split()[0:2]|join(' ') }}</h1><p class="muted">Here is how your class is doing today.</p></div>
+  <div class="actions">
+    <a class="btn btn-primary" href="{{ url_for('attendance_take') }}">✅ Take attendance</a>
+    <a class="btn" href="{{ url_for('performance_export') }}">⬇ Performance CSV</a>
+    <a class="btn" href="{{ url_for('marks_export') }}">⬇ Marks CSV</a>
+    <a class="btn" href="{{ url_for('attendance_export') }}">⬇ Attendance CSV</a>
+  </div>
+</div>
+<div class="grid cols-4">
+  <div class="card hover stat"><div class="ico">🎓</div><div><b>{{ n }}</b><span>Students</span></div></div>
+  <div class="card hover stat"><div class="ico">🗓️</div><div><b>{{ avg_att }}%</b><span>Average attendance</span></div></div>
+  <div class="card hover stat"><div class="ico">📝</div><div><b>{{ avg_marks }}%</b><span>Average internal marks</span></div></div>
+  <div class="card hover stat"><div class="ico">⚠️</div><div><b>{{ risk_counts.Red + risk_counts.Amber }}</b><span>Students at risk</span></div></div>
+  <div class="card hover stat"><div class="ico">📥</div><div><b>{{ pending_count }}</b><span>Awaiting evaluation</span></div></div>
+</div>
+<div class="grid cols-2">
+  <div class="card"><h2>Average marks by subject (%)</h2>
+    <div class="chart-box"><canvas data-chart="bar" data-max="100" data-labels='{{ subj_labels|tojson }}' data-values='{{ subj_vals|tojson }}'></canvas></div></div>
+  <div class="card"><h2>Risk distribution</h2>
+    <div class="chart-box"><canvas data-chart="donut" data-labels='["Green","Amber","Red"]' data-values='{{ [risk_counts.Green, risk_counts.Amber, risk_counts.Red]|tojson }}' data-colors='["#16a34a","#d97706","#dc2626"]'></canvas></div></div>
+</div>
+<div class="card"><h2>Attendance trend (% present, last 10 days)</h2>
+  {% if trend_vals %}<div class="chart-box"><canvas data-chart="bar" data-height="220" data-max="100" data-labels='{{ trend_labels|tojson }}' data-values='{{ trend_vals|tojson }}'></canvas></div>
+  {% else %}{{ empty('🗓️', 'No attendance yet', 'Take attendance to see the trend.') }}{% endif %}</div>
+<div class="grid cols-2">
+  <div class="card"><div class="page-head" style="margin:0 0 .5rem"><h2 style="margin:0">Students at risk</h2><a href="{{ url_for('analytics') }}">View all</a></div>
+    {% for s in at_risk %}<div class="list-item"><div><a href="{{ url_for('student_detail', roll=s.roll) }}"><b>{{ s.name }}</b></a><br><small>Att {{ s.att }}% · Avg {{ s.avg }}%</small></div>{{ badge(s.risk) }}</div>
+    {% else %}{{ empty('🎉', 'Everyone is on track', 'No student is currently flagged.') }}{% endfor %}</div>
+  <div class="card"><div class="page-head" style="margin:0 0 .5rem"><h2 style="margin:0">Pending evaluation</h2><a href="{{ url_for('assignments') }}">All assignments</a></div>
+    {% for s in pending %}<div class="list-item"><div><a href="{{ url_for('assignment_detail', aid=s.assignment_id) }}"><b>{{ s.title }}</b></a><br><small>{{ s.name }} · {{ s.submitted_on }}</small></div>{{ badge(s.status) }}</div>
+    {% else %}{{ empty('✅', 'All caught up', 'There are no submissions waiting for evaluation.') }}{% endfor %}</div>
+</div>
+{% endblock %}

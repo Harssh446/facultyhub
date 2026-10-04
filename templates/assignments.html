@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, empty %}
+{% block title %}Assignments{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Assignments</h1><p class="muted">{{ items|length }} assignment{{ '' if items|length == 1 else 's' }}</p></div>
+  {% if user.role == 'faculty' %}<a class="btn btn-primary" href="{{ url_for('assignment_new') }}">＋ New assignment</a>{% endif %}</div>
+{% if not items %}<div class="card">{{ empty('📚', 'No assignments yet', 'Create the first assignment to get started.') }}</div>
+{% elif user.role == 'faculty' %}
+<div class="card"><div class="table-wrap"><table><thead><tr><th>Title</th><th>Subject</th><th>Due</th><th>Submitted</th><th>Evaluated</th><th></th></tr></thead><tbody>
+{% for a in items %}<tr><td><b>{{ a.title }}</b></td><td>{{ a.subject }}</td><td>{{ a.due }}</td><td>{{ a.submitted }}/{{ a.total }}</td><td>{{ a.evaluated }}/{{ a.submitted }}</td><td><a class="btn btn-sm" href="{{ url_for('assignment_detail', aid=a.id) }}">Open</a></td></tr>{% endfor %}
+</tbody></table></div></div>
+{% else %}
+<div class="grid cols-3">{% for a in items %}
+  <div class="card hover"><div class="page-head" style="margin:0 0 .5rem"><h3>{{ a.title }}</h3>{{ badge(a.status) }}</div>
+    <p class="muted" style="margin:0 0 .8rem">{{ a.subject }} · due {{ a.due }}{% if a.sub and a.sub.marks is not none %} · scored {{ a.sub.marks }}/{{ a.max_marks }}{% endif %}</p>
+    <a class="btn btn-sm btn-primary" href="{{ url_for('assignment_detail', aid=a.id) }}">{{ 'Submit' if a.status == 'Pending' else 'View' }}</a></div>
+{% endfor %}</div>
+{% endif %}
+{% endblock %}

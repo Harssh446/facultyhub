@@ -1,0 +1,21 @@
+{% macro badge(text) %}<span class="badge b-{{ text|lower }}">{{ text }}</span>{% endmacro %}
+
+{% macro empty(icon, title, text) %}
+<div class="empty"><div class="empty-icon">{{ icon }}</div><h3>{{ title }}</h3><p>{{ text }}</p></div>
+{% endmacro %}
+
+{% macro ring(pct) %}
+{% set cls = 'ok' if pct >= 75 else ('warn' if pct >= 65 else 'bad') %}
+<div class="ring {{ cls }}"><svg viewBox="0 0 120 120"><circle class="ring-bg" cx="60" cy="60" r="52"/><circle class="ring-fg" cx="60" cy="60" r="52" stroke-dasharray="{{ (pct * 3.2673)|round(1) }} 326.73"/></svg>
+<div class="ring-text"><strong>{{ pct }}%</strong><span>attendance</span></div></div>
+{% endmacro %}
+
+{% macro topic_picker(topics) %}
+<div class="field"><label>Topics <small>(leave all unchecked to include every topic)</small></label>
+{% for subj, tl in topics.items() %}
+  <div class="topic-group chips" data-subject="{{ subj }}">
+    {% for t in tl %}<label class="chip"><input type="checkbox" name="topics" value="{{ t }}"> {{ t }}</label>{% endfor %}
+    {% if not tl %}<small>No approved questions for this subject yet.</small>{% endif %}
+  </div>
+{% endfor %}</div>
+{% endmacro %}

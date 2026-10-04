@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, empty %}
+{% block title %}Academic report{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Academic report</h1><p class="muted">{{ branch or 'All branches' }} · generated {{ generated }}</p></div>
+  <div class="actions no-print"><button class="btn btn-primary" data-print>🖨 Print report</button><a class="btn" href="{{ url_for('performance_export') }}">⬇ CSV</a></div></div>
+<form class="card toolbar no-print" method="get"><div><label class="lbl">Branch</label><select name="branch"><option value="">All branches</option>{% for b in BRANCHES %}<option {{ 'selected' if b == branch }}>{{ b }}</option>{% endfor %}</select></div><button class="btn btn-primary">Apply</button></form>
+<div class="grid cols-4">
+  <div class="card stat"><div class="ico">🎓</div><div><b>{{ stats|length }}</b><span>Students</span></div></div>
+  <div class="card stat"><div class="ico">🗓️</div><div><b>{{ avg_att }}%</b><span>Average attendance</span></div></div>
+  <div class="card stat"><div class="ico">📝</div><div><b>{{ avg_marks }}%</b><span>Average marks</span></div></div>
+  <div class="card stat"><div class="ico">⚠️</div><div><b>{{ at_risk|length }}</b><span>At risk</span></div></div>
+</div>
+<div class="card"><h2>Subject-wise performance</h2>
+  {% if subj_rows %}<div class="table-wrap"><table><thead><tr><th>Subject</th><th>Class average %</th><th>Grade</th></tr></thead><tbody>{% for r in subj_rows %}<tr><td>{{ r.subject }}</td><td>{{ r.avg }}</td><td>{{ r.grade }}</td></tr>{% endfor %}</tbody></table></div>
+  {% else %}{{ empty('📝', 'No marks recorded', 'Enter internal marks to populate this table.') }}{% endif %}</div>
+<div class="card"><h2>Student summary</h2>
+  {% if stats %}<div class="table-wrap"><table><thead><tr><th>Roll no</th><th>Name</th><th>Branch</th><th>Attendance</th><th>Avg marks</th><th>Grade</th><th>Risk</th></tr></thead><tbody>
+  {% for s in stats %}<tr><td>{{ s.roll }}</td><td>{{ s.name }}</td><td>{{ s.branch }}</td><td>{{ s.att }}%</td><td>{{ s.avg }}%</td><td>{{ s.grade }}</td><td>{{ badge(s.risk) }}</td></tr>{% endfor %}</tbody></table></div>
+  {% else %}{{ empty('🎓', 'No students', 'No students in this selection.') }}{% endif %}</div>
+<div class="card"><h2>Students needing attention</h2>
+  {% for s in at_risk %}<div class="list-item"><div><b>{{ s.name }}</b> <small>{{ s.roll }}</small><br><small>{{ s.reasons|join(' · ') }}</small></div>{{ badge(s.risk) }}</div>
+  {% else %}{{ empty('🎉', 'No concerns', 'All students meet the thresholds.') }}{% endfor %}</div>
+{% endblock %}

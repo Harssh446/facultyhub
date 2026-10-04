@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, empty %}
+{% block title %}Internal marks{% endblock %}
+{% block content %}
+{% if user.role == 'faculty' %}
+<div class="page-head"><div><h1>Internal assessment</h1><p class="muted">Test 1 /30 · Test 2 /30 · Assignment /20 · Total /{{ TOTAL }}. Blank rows are skipped.</p></div>
+  <a class="btn" href="{{ url_for('marks_export') }}">⬇ Export CSV</a></div>
+<form class="card toolbar" method="get"><div><label class="lbl">Subject</label>
+  <select name="subject" onchange="this.form.submit()">{% for s in SUBJECTS %}<option {{ 'selected' if s == subject }}>{{ s }}</option>{% endfor %}</select></div>
+  <button class="btn btn-primary">Load</button></form>
+<form class="card" method="post">
+  {{ csrf() }}<input type="hidden" name="subject" value="{{ subject }}">
+  <div class="table-wrap"><table data-total="{{ TOTAL }}"><thead><tr><th>Roll no</th><th>Name</th><th>Test 1</th><th>Test 2</th><th>Assignment</th><th>Total</th><th>Grade</th></tr></thead><tbody>
+  {% for s in students %}{% set m = cur.get(s.roll) %}
+  <tr class="mark-row"><td>{{ s.roll }}</td><td><b>{{ s.name }}</b></td>
+    {% for k in ['t1','t2','asg'] %}<td style="width:110px"><input class="mk" type="number" step="0.5" min="0" max="{{ MAXM[k] }}" data-max="{{ MAXM[k] }}" name="{{ k }}_{{ s.roll }}" value="{{ m[k] if m else '' }}"></td>{% endfor %}
+    <td class="tot"><b></b></td><td class="gr"></td></tr>
+  {% endfor %}</tbody></table></div>
+  <div style="margin-top:1rem"><button class="btn btn-primary">💾 Save marks for {{ subject }}</button></div>
+</form>
+{% else %}
+<div class="page-head"><div><h1>My marks</h1><p class="muted">Internal assessment, out of {{ TOTAL }} per subject</p></div></div>
+<div class="card">
+  {% if rows %}<div class="table-wrap"><table><thead><tr><th>Subject</th><th>Test 1 /30</th><th>Test 2 /30</th><th>Assignment /20</th><th>Total /{{ TOTAL }}</th><th>%</th><th>Grade</th></tr></thead><tbody>
+  {% for m in rows %}<tr><td>{{ m.subject }}</td><td>{{ m.t1 }}</td><td>{{ m.t2 }}</td><td>{{ m.asg }}</td><td><b>{{ m.total }}</b></td><td>{{ m.pct }}</td><td><b>{{ m.grade }}</b></td></tr>{% endfor %}</tbody></table></div>
+  {% else %}{{ empty('📝', 'No marks yet', 'Your marks will appear once faculty enters them.') }}{% endif %}
+</div>
+{% if rows %}<div class="card"><h2>Score by subject (%)</h2><div class="chart-box"><canvas data-chart="bar" data-max="100" data-labels='{{ rows|map(attribute="subject")|list|tojson }}' data-values='{{ rows|map(attribute="pct")|list|tojson }}'></canvas></div></div>{% endif %}
+{% endif %}
+{% endblock %}

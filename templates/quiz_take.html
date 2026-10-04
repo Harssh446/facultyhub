@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Quiz: {{ subject }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{{ subject }} quiz</h1><p class="muted">{{ qs|length }} question{{ '' if qs|length == 1 else 's' }}. Unanswered questions score zero.</p></div></div>
+<form method="post" action="{{ url_for('quiz_submit') }}">
+  {{ csrf() }}
+  {% for q in qs %}
+  <div class="card"><b>{{ loop.index }}. {{ q.question }}</b> <small>({{ q.topic }} · {{ q.difficulty }})</small>
+    {% for o in q.options %}<label class="q-opt"><input type="radio" name="q{{ q.id }}" value="{{ loop.index0 }}"> {{ 'ABCD'[loop.index0] }}. {{ o }}</label>{% endfor %}</div>
+  {% endfor %}
+  <button class="btn btn-primary">Submit quiz</button> <a class="btn btn-ghost" href="{{ url_for('quiz') }}">Cancel</a>
+</form>
+{% endblock %}

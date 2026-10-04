@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Lesson plan{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Lesson plan generator</h1><p class="muted">Uses your local Ollama model; falls back to a structured template if it is offline.</p></div></div>
+<form class="card" method="post" style="max-width:760px">
+  {{ csrf() }}
+  <div class="form-row">
+    <div class="field"><label>Subject</label><select name="subject">{% for s in SUBJECTS %}<option {{ 'selected' if f.get('subject') == s }}>{{ s }}</option>{% endfor %}</select></div>
+    <div class="field"><label>Topic</label><input name="topic" required value="{{ f.get('topic', '') }}" placeholder="e.g. Binary search trees"></div>
+    <div class="field"><label>Duration (min)</label><input type="number" name="minutes" min="10" max="240" value="{{ f.get('minutes', 60) }}"></div>
+    <div class="field"><label>Level</label><select name="level">{% for l in ['Undergraduate year 1','Undergraduate year 2','Undergraduate year 3','Undergraduate year 4'] %}<option {{ 'selected' if f.get('level') == l }}>{{ l }}</option>{% endfor %}</select></div>
+  </div>
+  <div class="field"><label>Extra objectives <small>(optional)</small></label><textarea name="objectives" rows="2">{{ f.get('objectives', '') }}</textarea></div>
+  <button class="btn btn-primary">✨ Generate lesson plan</button>
+</form>
+{% if plan %}
+<div class="card"><div class="page-head" style="margin:0 0 .8rem"><h2 style="margin:0">Your lesson plan <span class="badge {{ 'b-green' if plan.source == 'ollama' else 'b-late' }}">{{ 'AI (Ollama)' if plan.source == 'ollama' else 'Template fallback' }}</span></h2>
+  <div class="actions no-print"><button class="btn btn-sm" data-copy="#plan">Copy</button><button class="btn btn-sm" data-print>Print</button></div></div>
+  <div class="doc" id="plan">{{ plan }}</div></div>
+{% endif %}
+{% endblock %}

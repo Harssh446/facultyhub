@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, empty, ring %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+{% set st = p.stat %}
+<div class="page-head"><div><h1>Hi, {{ p.student.name.split()[0] }} 👋</h1><p class="muted">{{ p.student.roll }} · {{ p.student.branch }}</p></div>
+  <div class="actions"><a class="btn btn-primary" href="{{ url_for('quiz') }}">🧠 Take a quiz</a><a class="btn" href="{{ url_for('student_detail', roll=p.student.roll, summary=1) }}">✨ My progress summary</a></div></div>
+<div class="grid cols-3">
+  <div class="card" style="text-align:center">{{ ring(st.att) }}<p class="muted" style="margin:.6rem 0 0">{{ st.present }} of {{ st.days }} days attended</p></div>
+  <div class="card hover stat"><div class="ico">📝</div><div><b>{{ st.avg }}%</b><span>Average internal marks · Grade {{ st.grade }}</span></div></div>
+  <div class="card"><h2>Risk status</h2>{{ badge(st.risk) }}
+    {% for r in st.reasons %}<p class="muted" style="margin:.5rem 0 0">• {{ r }}</p>{% else %}<p class="muted" style="margin:.5rem 0 0">You're on track. Keep it up!</p>{% endfor %}</div>
+</div>
+<div class="grid cols-2">
+  <div class="card"><h2>Assignments due</h2>
+    {% for a in due %}<div class="list-item"><div><a href="{{ url_for('assignment_detail', aid=a.id) }}"><b>{{ a.title }}</b></a><br><small>{{ a.subject }} · due {{ a.due }}</small></div>{{ badge('Pending') }}</div>
+    {% else %}{{ empty('🎉', 'Nothing pending', 'You have submitted every assignment.') }}{% endfor %}</div>
+  <div class="card"><h2>Recent quiz scores</h2>
+    {% for x in p.attempts %}<div class="list-item"><div><b>{{ x.subject }}</b><br><small>{{ x.date }}</small></div><span>{{ x.score }}/{{ x.total }} ({{ x.pct }}%)</span></div>
+    {% else %}{{ empty('🧠', 'No quizzes yet', 'Take a quiz to practise.') }}{% endfor %}</div>
+</div>
+<div class="card"><h2>My marks</h2>
+  {% if p.marks %}<div class="table-wrap"><table><thead><tr><th>Subject</th><th>Test 1 /30</th><th>Test 2 /30</th><th>Assignment /20</th><th>Total /{{ TOTAL }}</th><th>%</th><th>Grade</th></tr></thead><tbody>
+  {% for m in p.marks %}<tr><td>{{ m.subject }}</td><td>{{ m.t1 }}</td><td>{{ m.t2 }}</td><td>{{ m.asg }}</td><td><b>{{ m.total }}</b></td><td>{{ m.pct }}</td><td>{{ badge(m.grade) if false else m.grade }}</td></tr>{% endfor %}</tbody></table></div>
+  {% else %}{{ empty('📝', 'No marks yet', 'Your marks will appear once faculty enters them.') }}{% endif %}</div>
+{% endblock %}

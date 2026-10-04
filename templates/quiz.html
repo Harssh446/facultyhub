@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "_macros.html" import topic_picker %}
+{% block title %}Quiz{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{{ 'Take a quiz' if user.role == 'student' else 'Quiz preview' }}</h1><p class="muted">Pick a subject and difficulty. You'll get your score instantly.{% if user.role == 'faculty' %} (Faculty attempts are not recorded.){% endif %}</p></div></div>
+<form class="card" method="post" action="{{ url_for('quiz_start') }}" style="max-width:700px">
+  {{ csrf() }}
+  <div class="field"><label>Subject</label><select name="subject" data-topic-switch>{% for s in SUBJECTS %}<option>{{ s }}</option>{% endfor %}</select></div>
+  {{ topic_picker(topics) }}
+  <div class="form-row">
+    <div class="field"><label>Difficulty</label><select name="difficulty"><option value="any">Mixed</option><option>easy</option><option>medium</option><option>hard</option></select></div>
+    <div class="field"><label>Number of questions</label><input type="number" name="count" min="1" max="20" value="5"></div>
+  </div>
+  <button class="btn btn-primary">Start quiz</button>
+</form>
+{% endblock %}

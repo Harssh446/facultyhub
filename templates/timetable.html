@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Timetable{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Weekly timetable</h1><p class="muted">Today is {{ today_name }}.</p></div><button class="btn no-print" data-print>🖨 Print</button></div>
+<div class="card"><div class="table-wrap"><table class="tt"><thead><tr><th>Time</th>{% for d in days %}<th>{{ d }}</th>{% endfor %}</tr></thead><tbody>
+{% for t in times %}<tr><td><b>{{ t }}</b></td>
+  {% for d in days %}{% set c = grid.get(d ~ '|' ~ t) %}<td class="{{ 'now' if d == today_name }}">{% if c %}<div class="slot"><b>{{ c.subject }}</b><small>Room {{ c.room }}</small></div>{% else %}–{% endif %}</td>{% endfor %}</tr>
+{% endfor %}</tbody></table></div></div>
+{% endblock %}

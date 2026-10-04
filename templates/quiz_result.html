@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Quiz result{% endblock %}
+{% block content %}
+{% set pct = (score / total * 100)|round|int %}
+<div class="page-head"><div><h1>Your result</h1><p class="muted">{{ subject }}{% if saved %} · saved to your record{% endif %}</p></div>
+  <div class="actions"><a class="btn btn-primary" href="{{ url_for('quiz') }}">Try another quiz</a><a class="btn btn-ghost" href="{{ url_for('dashboard') }}">Dashboard</a></div></div>
+<div class="card stat"><div class="ico">{{ '🏆' if pct >= 70 else ('👍' if pct >= 40 else '📖') }}</div><div><b>{{ score }} / {{ total }} ({{ pct }}%)</b><span>{{ 'Excellent work!' if pct >= 70 else ('Good effort, review the answers below.' if pct >= 40 else 'Keep practising, check the explanations below.') }}</span></div></div>
+{% for r in results %}
+<div class="card"><b>{{ loop.index }}. {{ r.q.question }}</b> <span class="badge {{ 'b-green' if r.ok else 'b-red' }}">{{ 'Correct' if r.ok else ('Wrong' if r.chosen is not none else 'Skipped') }}</span>
+  {% for o in r.q.options %}{% set i = loop.index0 %}
+  <div class="q-opt {{ 'right' if i == r.q.answer else ('wrong' if i == r.chosen else '') }}">{{ 'ABCD'[i] }}. {{ o }}{% if i == r.q.answer %} ✔{% elif i == r.chosen %} ✘ (your answer){% endif %}</div>{% endfor %}</div>
+{% endfor %}
+{% endblock %}

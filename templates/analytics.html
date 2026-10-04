@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, empty %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Performance analytics</h1><p class="muted">Risk rule: <b>Red</b> if attendance &lt; 65% or marks &lt; 40%; <b>Amber</b> if attendance &lt; 75% or marks &lt; 55%; otherwise <b>Green</b>.</p></div>
+  <a class="btn" href="{{ url_for('performance_export') }}">⬇ Export CSV</a></div>
+<div class="grid cols-2">
+  <div class="card"><h2>Risk distribution</h2><div class="chart-box"><canvas data-chart="donut" data-labels='["Green","Amber","Red"]' data-values='{{ [counts.Green, counts.Amber, counts.Red]|tojson }}' data-colors='["#16a34a","#d97706","#dc2626"]'></canvas></div></div>
+  <div class="card"><h2>Average marks per student (%)</h2><div class="chart-box"><canvas data-chart="bar" data-max="100" data-labels='{{ labels|tojson }}' data-values='{{ vals|tojson }}'></canvas></div></div>
+</div>
+<div class="card"><h2>⚠️ Students at risk ({{ at_risk|length }})</h2>
+  {% for s in at_risk %}<div class="list-item"><div><a href="{{ url_for('student_detail', roll=s.roll) }}"><b>{{ s.name }}</b></a> <small>{{ s.roll }} · {{ s.branch }}</small><br><small>{{ s.reasons|join(' · ') }}</small></div>
+    <div class="actions">{{ badge(s.risk) }}<a class="btn btn-sm" href="{{ url_for('student_detail', roll=s.roll, summary=1) }}">✨ Summary</a></div></div>
+  {% else %}{{ empty('🎉', 'No students at risk', 'Everyone meets the attendance and marks thresholds.') }}{% endfor %}</div>
+<form class="card toolbar" method="get">
+  <div><label class="lbl">Branch</label><select name="branch"><option value="">All</option>{% for b in BRANCHES %}<option {{ 'selected' if b == branch }}>{{ b }}</option>{% endfor %}</select></div>
+  <div><label class="lbl">Risk</label><select name="risk"><option value="">All</option>{% for r in ['Green','Amber','Red'] %}<option {{ 'selected' if r == risk }}>{{ r }}</option>{% endfor %}</select></div>
+  <button class="btn btn-primary">Filter</button><a class="btn btn-ghost" href="{{ url_for('analytics') }}">Reset</a>
+</form>
+<div class="card"><h2>All students</h2>
+  {% if rows %}<div class="table-wrap"><table><thead><tr><th>Roll no</th><th>Name</th><th>Branch</th><th>Attendance</th><th>Avg marks</th><th>Grade</th><th>Risk</th></tr></thead><tbody>
+  {% for s in rows %}<tr><td>{{ s.roll }}</td><td><a href="{{ url_for('student_detail', roll=s.roll) }}">{{ s.name }}</a></td><td>{{ s.branch }}</td><td>{{ s.att }}%</td><td>{{ s.avg }}%</td><td>{{ s.grade }}</td><td>{{ badge(s.risk) }}</td></tr>{% endfor %}</tbody></table></div>
+  {% else %}{{ empty('🔍', 'No students match', 'Try different filters.') }}{% endif %}</div>
+<div class="card"><h2>Recent quiz attempts</h2>
+  {% for x in attempts %}<div class="list-item"><div><b>{{ x.name }}</b><br><small>{{ x.subject }} · {{ x.date }}</small></div><span>{{ x.score }}/{{ x.total }} ({{ x.pct }}%)</span></div>
+  {% else %}{{ empty('🧠', 'No quiz attempts yet', 'Attempts appear here once students take quizzes.') }}{% endfor %}</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Take attendance{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Take attendance</h1><p class="muted">Everyone is marked Present by default. Change only the exceptions.</p></div></div>
+<form class="card toolbar" method="get">
+  <div><label class="lbl">Date</label><input type="date" name="date" value="{{ date }}" max="{{ today_str }}"></div>
+  <button class="btn btn-primary">Load date</button>
+  {% if existing %}<span class="badge b-late" style="flex:0 0 auto">Already recorded for this date, saving will overwrite</span>{% endif %}
+</form>
+<form class="card" method="post">
+  {{ csrf() }}<input type="hidden" name="date" value="{{ date }}">
+  <div class="actions" style="margin-bottom:.8rem">
+    <button type="button" class="btn btn-sm" data-set-all="Present">All present</button>
+    <button type="button" class="btn btn-sm" data-set-all="Absent">All absent</button>
+    <span class="muted" id="tally" style="align-self:center"></span>
+  </div>
+  <div class="table-wrap"><table><thead><tr><th>Roll no</th><th>Name</th><th>Branch</th><th>Status</th></tr></thead><tbody>
+  {% for s in students %}{% set cur = existing.get(s.roll, 'Present') %}
+  <tr><td>{{ s.roll }}</td><td><b>{{ s.name }}</b></td><td>{{ s.branch }}</td>
+    <td><div class="seg">{% for st in STATUSES %}<label><input class="att-radio" type="radio" name="status_{{ s.roll }}" value="{{ st }}" {{ 'checked' if cur == st }}> {{ st }}</label>{% endfor %}</div></td></tr>
+  {% endfor %}</tbody></table></div>
+  <div style="margin-top:1rem"><button class="btn btn-primary">💾 Save attendance</button> <a class="btn btn-ghost" href="{{ url_for('attendance_history') }}">View history</a></div>
+</form>
+{% endblock %}

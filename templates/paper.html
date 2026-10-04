@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "_macros.html" import topic_picker %}
+{% block title %}Paper generator{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Question paper generator</h1><p class="muted">Builds a printable paper from approved questions in the bank.</p></div></div>
+<form class="card" method="post" style="max-width:760px">
+  {{ csrf() }}
+  <div class="form-row">
+    <div class="field"><label>Paper title</label><input name="title" value="Internal Assessment 1"></div>
+    <div class="field"><label>Subject</label><select name="subject" data-topic-switch>{% for s in SUBJECTS %}<option>{{ s }}</option>{% endfor %}</select></div>
+  </div>
+  {{ topic_picker(topics) }}
+  <div class="form-row">
+    <div class="field"><label>Difficulty</label><select name="difficulty"><option value="any">Mixed</option><option>easy</option><option>medium</option><option>hard</option></select></div>
+    <div class="field"><label>Number of questions</label><input type="number" name="count" min="1" max="50" value="10"></div>
+    <div class="field"><label>Marks per question</label><input type="number" name="marks_per" min="1" max="20" value="1"></div>
+    <div class="field"><label>Duration (minutes)</label><input type="number" name="duration" min="5" max="300" value="30"></div>
+  </div>
+  <label class="chip" style="margin-bottom:1rem"><input type="checkbox" name="show_key" value="1" checked> Include answer key page</label><br>
+  <button class="btn btn-primary">Generate paper</button>
+</form>
+{% endblock %}

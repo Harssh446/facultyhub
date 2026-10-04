@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, empty %}
+{% block title %}Attendance history{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{{ 'Attendance history' if user.role == 'faculty' else 'My attendance' }}</h1><p class="muted">{{ total }} record{{ '' if total == 1 else 's' }} · {{ counts.Present }} present · {{ counts.Late }} late · {{ counts.Absent }} absent</p></div>
+  <a class="btn btn-primary" href="{{ url_for('attendance_export') }}{{ '?' ~ qs if qs }}">⬇ Export CSV</a></div>
+<form class="card toolbar" method="get">
+  <div><label class="lbl">From</label><input type="date" name="from" value="{{ request.args.get('from', '') }}"></div>
+  <div><label class="lbl">To</label><input type="date" name="to" value="{{ request.args.get('to', '') }}"></div>
+  {% if user.role == 'faculty' %}
+  <div><label class="lbl">Student</label><select name="roll"><option value="">All students</option>{% for s in students %}<option value="{{ s.roll }}" {{ 'selected' if request.args.get('roll') == s.roll }}>{{ s.roll }} · {{ s.name }}</option>{% endfor %}</select></div>
+  <div><label class="lbl">Branch</label><select name="branch"><option value="">All</option>{% for b in BRANCHES %}<option {{ 'selected' if request.args.get('branch') == b }}>{{ b }}</option>{% endfor %}</select></div>
+  {% endif %}
+  <div><label class="lbl">Status</label><select name="status"><option value="">Any</option>{% for s in STATUSES %}<option {{ 'selected' if request.args.get('status') == s }}>{{ s }}</option>{% endfor %}</select></div>
+  <button class="btn btn-primary">Apply</button><a class="btn btn-ghost" href="{{ url_for('attendance_history') }}">Reset</a>
+</form>
+<div class="card">
+  {% if rows %}<div class="table-wrap"><table><thead><tr><th>Date</th><th>Roll no</th><th>Name</th><th>Branch</th><th>Status</th></tr></thead><tbody>
+  {% for r in rows %}<tr><td>{{ r.date }}</td><td>{{ r.roll }}</td><td>{{ r.name }}</td><td>{{ r.branch }}</td><td>{{ badge(r.status) }}</td></tr>{% endfor %}</tbody></table></div>
+  {% if total > rows|length %}<p class="muted">Showing the latest {{ rows|length }} of {{ total }}. Use Export CSV for everything.</p>{% endif %}
+  {% else %}{{ empty('🗓️', 'No records found', 'Adjust the filters or take attendance first.') }}{% endif %}
+</div>
+{% endblock %}

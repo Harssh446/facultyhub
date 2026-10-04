@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}New assignment{% endblock %}
+{% block content %}
+<div class="page-head"><h1>New assignment</h1></div>
+<form class="card" method="post" style="max-width:640px">
+  {{ csrf() }}
+  <div class="field"><label>Title</label><input name="title" required value="{{ request.form.get('title', '') }}"></div>
+  <div class="form-row">
+    <div class="field"><label>Subject</label><select name="subject">{% for s in SUBJECTS %}<option {{ 'selected' if request.form.get('subject') == s }}>{{ s }}</option>{% endfor %}</select></div>
+    <div class="field"><label>Due date</label><input type="date" name="due" required value="{{ request.form.get('due', '') }}"></div>
+    <div class="field"><label>Max marks</label><input type="number" name="max_marks" min="1" max="100" value="{{ request.form.get('max_marks', 20) }}"></div>
+  </div>
+  <div class="field"><label>Description</label><textarea name="description" rows="4">{{ request.form.get('description', '') }}</textarea></div>
+  <button class="btn btn-primary">Create assignment</button> <a class="btn btn-ghost" href="{{ url_for('assignments') }}">Cancel</a>
+</form>
+{% endblock %}
